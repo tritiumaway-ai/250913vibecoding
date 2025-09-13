@@ -13,10 +13,12 @@ default_file = "countriesMBTI_16types.csv"
 df = None
 if os.path.exists(default_file):
     df = pd.read_csv(default_file)
+    st.info("기본 데이터를 불러왔습니다 ✅")
 else:
     uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
     if uploaded_file is not None:
         df = pd.read_csv(uploaded_file)
+        st.info("업로드한 데이터를 불러왔습니다 ✅")
 
 # 데이터가 준비된 경우
 if df is not None:
@@ -36,19 +38,12 @@ if df is not None:
 
     st.subheader(f"Top 10 국가 ({selected_type})")
 
+    # Top1 국가명
+    top1_country = top10.iloc[0]["Country"]
+
     # Altair 그래프
     chart = (
         alt.Chart(top10)
         .mark_bar()
         .encode(
-            x=alt.X(selected_type, title="비율"),
-            y=alt.Y("Country", sort="-x", title="국가"),
-            tooltip=["Country", selected_type],
-        )
-        .interactive()
-    )
-
-    st.altair_chart(chart, use_container_width=True)
-
-else:
-    st.warning("CSV 파일을 찾을 수 없습니다. 업로드해주세요.")
+            x=alt.X(sel
