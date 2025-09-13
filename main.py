@@ -1,51 +1,54 @@
 import streamlit as st
+import pandas as pd
+import altair as alt
+import os
 
-# 페이지 설정
-st.set_page_config(page_title="MBTI 공부법 추천기 📚", page_icon="🧠", layout="centered")
+# 제목
+st.title("🌍 국가별 MBTI 유형 분포 분석")
 
-# 타이틀 & 설명
-st.title("🔍 MBTI 기반 공부법 추천기")
-st.markdown("당신의 MBTI 유형에 딱 맞는 ✨ **최적의 공부 전략** ✨을 알려드릴게요!")
-st.markdown("공부도 성격에 맞춰야 오래 갑니다! 😉")
+# CSV 파일 기본 경로
+default_file = "countriesMBTI_16types.csv"
 
-# MBTI 목록
-mbti_list = [
-    "INTJ", "INTP", "ENTJ", "ENTP",
-    "INFJ", "INFP", "ENFJ", "ENFP",
-    "ISTJ", "ISFJ", "ESTJ", "ESFJ",
-    "ISTP", "ISFP", "ESTP", "ESFP"
-]
+# 데이터 불러오기
+df = None
+if os.path.exists(default_file):
+    df = pd.read_csv(default_file)
+else:
+    uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
+    if uploaded_file is not None:
+        df = pd.read_csv(uploaded_file)
 
-# MBTI 선택
-selected_mbti = st.selectbox("🧬 당신의 MBTI 유형을 선택하세요:", mbti_list)
+# 데이터가 준비된 경우
+if df is not None:
+    st.subheader("데이터 미리보기")
+    st.dataframe(df.head())
 
-# 공부법 데이터
-study_methods = {
-    "INTJ": "🧠 **INTJ - 전략적인 마스터 플래너**\n\n계획적으로 움직이며 목표를 향해 전진! ✅ 시간표 작성과 학습 루틴을 자동화해보세요. 집중력 높은 환경이 중요해요. 🔒",
-    "INTP": "🔬 **INTP - 호기심 가득한 탐구가**\n\n깊게 파고드는 능력이 탁월! 마인드맵, 위키 탐색, 유튜브 강의로 깊이 있게 접근해 보세요. 💡 혼자 생각하는 시간도 중요! 🧘‍♂️",
-    "ENTJ": "📊 **ENTJ - 효율을 중시하는 전략가**\n\n목표 설정과 성취에 강한 타입! 체크리스트와 시간 관리 앱 활용이 효과적입니다. 리더십을 살려 친구들과 스터디 리드도 OK! 👑",
-    "ENTP": "💥 **ENTP - 창의적 도전자**\n\n토론, 질문, 브레인스토밍에 강해요! 📣 다양한 방식의 학습(팟캐스트, 퀴즈, 토론 등)이 잘 맞아요. 멀티태스킹도 OK! 🔄",
-    "INFJ": "🌌 **INFJ - 통찰력 있는 조용한 조언자**\n\n혼자만의 조용한 공간에서 의미를 찾으며 공부하는 걸 좋아해요. 글쓰기나 저널링도 효과적이에요. ✍️ 감성+논리를 모두 활용하세요.",
-    "INFP": "🎨 **INFP - 감성적인 이상주의자**\n\n스토리텔링 방식의 학습에 강해요. ✨ 감정이입 가능한 사례 중심 학습이 좋습니다. 컬러풀한 노트와 감성적인 배경음악도 효과적! 🎶",
-    "ENFJ": "🤝 **ENFJ - 따뜻한 리더**\n\n타인과 함께할 때 시너지 UP! 💬 스터디 그룹이나 가르치기 방식의 학습이 효과적입니다. 책임감을 자극해보세요. 🧑‍🏫",
-    "ENFP": "🔥 **ENFP - 열정의 모험가**\n\n지루함엔 약해요! 😅 다양한 형식(카드, 게임, 그림)으로 재미를 주며 공부하세요. 짧고 집중적인 세션 추천! ⏱️",
-    "ISTJ": "📂 **ISTJ - 신뢰가는 관리자**\n\n루틴을 잘 지키는 당신! 체계적인 요약, 복습 위주의 학습이 딱입니다. 📅 정확한 일정 관리로 완벽하게 준비해요!",
-    "ISFJ": "💖 **ISFJ - 배려 깊은 수호자**\n\n성실하게 차분히 공부하는 스타일! 🎀 조용하고 예쁜 환경에서 학습하고, 예쁜 필기와 정리 노트 활용 추천! 📓",
-    "ESTJ": "🏆 **ESTJ - 리더십 강한 현실주의자**\n\n결과 중심! 테스트, 모의고사 위주의 학습이 잘 맞아요. 💼 성취를 기록하며 동기부여를 유지하세요. 📈",
-    "ESFJ": "🎤 **ESFJ - 다정한 모범생**\n\n함께 공부하며 지식을 나누는 걸 좋아해요. 👨‍👩‍👧‍👦 발표, 설명 방식의 학습으로 자신감도 UP! 👍",
-    "ISTP": "🛠️ **ISTP - 분석적 실용주의자**\n\n직접 손으로 해보는 학습에 강해요! 실험, 문제풀이, 시뮬레이션 활용 추천! 🧪 손으로 체험하며 배우세요!",
-    "ISFP": "🌺 **ISFP - 감각적인 힐링러**\n\n감성적이고 미적인 것에 끌려요. 🎨 아날로그 노트, 따뜻한 조명 아래에서 음악과 함께 공부해보세요. 🎧",
-    "ESTP": "🚴 **ESTP - 즉흥적 실천가**\n\n즉각적인 반응과 행동 중심의 학습에 능숙! 타이머 학습법, 퀴즈, 플래시카드로 역동적으로! ⚡",
-    "ESFP": "🎭 **ESFP - 에너지 넘치는 퍼포머**\n\n즐겁게, 생동감 있게! 💃 게임형 학습, 동영상, 팀워크 기반 활동으로 신나게 공부해요! 🎮"
-}
+    # MBTI 유형 목록 (첫 번째 컬럼 'Country' 제외)
+    mbti_types = df.columns[1:].tolist()
 
-# 출력
-if selected_mbti:
-    st.markdown("----")
-    st.subheader(f"🎯 {selected_mbti} 유형을 위한 공부법은?")
-    st.success(study_methods[selected_mbti])
-    st.markdown("📌 **Tip:** 자신의 성향을 이해하고, 그에 맞는 방법으로 꾸준히 해보는 게 핵심이에요! 💪")
+    # 사용자에게 MBTI 유형 선택 받기
+    selected_type = st.selectbox("MBTI 유형을 선택하세요", mbti_types)
 
-# 푸터
-st.markdown("----")
-st.caption("📘 Created with ❤️ by Streamlit | 이 추천은 참고용이에요. 자신에게 맞는 스타일을 찾아보세요! 😄")
+    # 선택된 MBTI 유형 기준으로 상위 10개국 추출
+    top10 = df[["Country", selected_type]].sort_values(
+        by=selected_type, ascending=False
+    ).head(10)
+
+    st.subheader(f"Top 10 국가 ({selected_type})")
+
+    # Altair 그래프
+    chart = (
+        alt.Chart(top10)
+        .mark_bar()
+        .encode(
+            x=alt.X(selected_type, title="비율"),
+            y=alt.Y("Country", sort="-x", title="국가"),
+            tooltip=["Country", selected_type],
+        )
+        .interactive()
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+else:
+    st.warning("CSV 파일을 찾을 수 없습니다. 업로드해주세요.")
