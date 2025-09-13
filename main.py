@@ -1,27 +1,17 @@
 import streamlit as st
 import pandas as pd
 import altair as alt
-import os
 
 # 제목
 st.title("🌍 국가별 MBTI 유형 분포 분석")
 
-# CSV 파일 기본 경로
-default_file = "countriesMBTI_16types.csv"
+# CSV 파일 업로드
+uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
 
-# 데이터 불러오기
-df = None
-if os.path.exists(default_file):
-    df = pd.read_csv(default_file)
-    st.info("기본 데이터를 불러왔습니다 ✅")
-else:
-    uploaded_file = st.file_uploader("CSV 파일을 업로드하세요", type=["csv"])
-    if uploaded_file is not None:
-        df = pd.read_csv(uploaded_file)
-        st.info("업로드한 데이터를 불러왔습니다 ✅")
+if uploaded_file is not None:
+    # 데이터 불러오기
+    df = pd.read_csv(uploaded_file)
 
-# 데이터가 준비된 경우
-if df is not None:
     st.subheader("데이터 미리보기")
     st.dataframe(df.head())
 
@@ -46,4 +36,19 @@ if df is not None:
         alt.Chart(top10)
         .mark_bar()
         .encode(
-            x=alt.X(sel
+            x=alt.X(selected_type, title="비율"),
+            y=alt.Y("Country", sort="-x", title="국가"),
+            color=alt.condition(
+                alt.datum.Country == top1_country,
+                alt.value("red"),        # Top1 → 빨간색
+                alt.value("steelblue")   # 나머지 → 파란색
+            ),
+            tooltip=["Country", selected_type],
+        )
+        .interactive()
+    )
+
+    st.altair_chart(chart, use_container_width=True)
+
+else:
+    st.warning("CSV 파일을 업로드해주세요.")
